@@ -2,6 +2,8 @@ package org.skrmnj.membermanagement.services;
 
 import lombok.AllArgsConstructor;
 import org.skrmnj.membermanagement.controller.beans.MemberRegistrationRequest;
+import org.skrmnj.membermanagement.domain.Address;
+import org.skrmnj.membermanagement.domain.AddressRepository;
 import org.skrmnj.membermanagement.domain.Member;
 import org.skrmnj.membermanagement.domain.MemberRepository;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import java.util.Objects;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final AddressRepository addressRepository;
 
     public List<Member> getAllMembersFromLastName(String lastName, String firstName) {
         return memberRepository.findAllByLastNameOrFirstName(lastName, firstName);
@@ -23,6 +26,7 @@ public class MemberService {
     public boolean registerMember(MemberRegistrationRequest memberRegistrationRequest) {
 
         Member primaryMember = memberRepository.saveAndFlush(convertToMember(memberRegistrationRequest, true, null));
+        addressRepository.saveAndFlush(convertToAddress(memberRegistrationRequest, primaryMember));
 
         List<Member> additionalMembers = Objects.requireNonNullElse(memberRegistrationRequest.getAdditionalMembers(), new ArrayList<MemberRegistrationRequest>())
                 .stream().map(x -> convertToMember(x, false, primaryMember.getId())).toList();
@@ -50,6 +54,20 @@ public class MemberService {
         member.setIsPrimary(isPrimary ? 'Y' : 'N');
 
         return member;
+    }
+
+    private Address convertToAddress(MemberRegistrationRequest memberRegistrationRequest, Member primaryUser) {
+        Address address = new Address();
+
+        address.setPrimaryPerson(primaryUser);
+        address.setStreetName(memberRegistrationRequest.getAddress().getStreetName());
+        address.setCity(memberRegistrationRequest.getAddress().getCity());
+        address.setAptOrUnitNo(memberRegistrationRequest.getAddress().getAptOrUnitNo());
+        address.setState(memberRegistrationRequest.getAddress().getState());
+        address.setCountry(memberRegistrationRequest.getAddress().getCountry());
+        address.setZipCode(memberRegistrationRequest.getAddress().getZipcode());
+
+        return address;
     }
 
 }
