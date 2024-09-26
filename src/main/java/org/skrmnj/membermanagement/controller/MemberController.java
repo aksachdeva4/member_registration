@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@CrossOrigin
 @Slf4j
 @RestController
 @RequestMapping("/member")
@@ -29,6 +30,12 @@ public class MemberController {
         }
 
         return memberService.getAllMembersFromLastName(lastName, firstName);
+    }
+
+    @GetMapping("/get-all")
+    public List<Member> getAllMembers() {
+        log.debug("Test");
+        return memberService.getAllMembers();
     }
 
     @PostMapping("/register")

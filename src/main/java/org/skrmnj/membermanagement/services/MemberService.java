@@ -23,6 +23,10 @@ public class MemberService {
         return memberRepository.findAllByLastNameOrFirstName(lastName, firstName);
     }
 
+    public List<Member> getAllMembers() {
+        return memberRepository.findAll();
+    }
+
     public boolean registerMember(MemberRegistrationRequest memberRegistrationRequest) {
 
         Member primaryMember = memberRepository.saveAndFlush(convertToMember(memberRegistrationRequest, true, null));
