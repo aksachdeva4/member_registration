@@ -1,41 +1,54 @@
 <div class="container-fluid">
     <h1>Member Management System</h1>
 
+    <ul #nav="ngbNav" [(activeId)]="active" class="nav-tabs" ngbNav>
+        <li [ngbNavItem]="1">
+            <button ngbNavLink>Member Registration</button>
+            <ng-template ngbNavContent>
 
+            </ng-template>
+        </li>
+        <li [ngbNavItem]="2">
+            <button ngbNavLink>Lookup Member</button>
+            <ng-template ngbNavContent>
+                <div class="row">
+                    <div class="col-4">
+                        <div class="mb-3">
+                            <label class="form-label" for="firstName">First Name : </label>
+                            <input [(ngModel)]="firstName" class="form-control" id="firstName" placeholder="First Name" type="text">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="lastName">Last Name : </label>
+                            <input [(ngModel)]="lastName" class="form-control" id="lastName" placeholder="Last Name" type="text">
+                        </div>
+                        <button (click)="filterMembers()" class="btn btn-primary" type="button">Filter Members</button>
+                    </div>
+                    <div class="col-8">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">First Name</th>
+                                    <th scope="col">Last Name</th>
+                                    <th scope="col">Contact No.</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let member of members">
+                                    <td>{{ member.id }}</td>
+                                    <td>{{ member.firstName }}</td>
+                                    <td>{{ member.lastName }}</td>
+                                    <td>{{ member.countryCode }} {{ member.phoneNumber }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <ngb-pagination (pageChange)="loadPage()" [(page)]="pagination.currentPage" [boundaryLinks]="true" [collectionSize]="pagination.totalRows" [ellipses]="false" [maxSize]="5" [rotate]="true"/>
+                    </div>
 
-    <div class="row">
-        <div class="col-4">
-            <div class="mb-3">
-                <label for="firstName" class="form-label">First Name : </label>
-                <input type="text" class="form-control" id="firstName" placeholder="First Name">
-            </div>
-            <div class="mb-3">
-                <label for="lastName" class="form-label">Last Name : </label>
-                <input type="text" class="form-control" id="lastName" placeholder="Last Name" [(ngModel)]="lastName">
-            </div>
-            <button type="button" (click)="filterMembers()">Filter Members</button>
-        </div>
-        <div class="col-8">
-            <table class="table table-striped">
-                <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">First Name</th>
-                    <th scope="col">Last Name</th>
-                    <th scope="col">Contact No.</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr *ngFor="let member of members">
-                    <td>{{ member.id }}</td>
-                    <td>{{ member.firstName }}</td>
-                    <td>{{ member.lastName }}</td>
-                    <td>{{ member.countryCode }} {{ member.phoneNumber }}</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-
-    </div>
+                </div>
+            </ng-template>
+        </li>
+    </ul>
+    <div [ngbNavOutlet]="nav" class="mt-2"></div>
 
 </div>
