@@ -1,17 +1,24 @@
 package org.skrmnj.membermanagement.services;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.skrmnj.membermanagement.controller.beans.MemberListRequest;
 import org.skrmnj.membermanagement.controller.beans.MemberRegistrationRequest;
+import org.skrmnj.membermanagement.controller.beans.MembersListResponse;
 import org.skrmnj.membermanagement.domain.Address;
 import org.skrmnj.membermanagement.domain.AddressRepository;
 import org.skrmnj.membermanagement.domain.Member;
 import org.skrmnj.membermanagement.domain.MemberRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class MemberService {
@@ -19,8 +26,27 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final AddressRepository addressRepository;
 
-    public List<Member> getAllMembersFromLastName(String lastName, String firstName) {
-        return memberRepository.findAllByLastNameOrFirstName(lastName, firstName);
+    @Transactional
+    public MembersListResponse getAllMembersFromLastName(MemberListRequest request) {
+
+        int pageNumber = 0;
+        int pageSize = 20;
+
+        if (null != request.getPagination()) {
+            if (request.getPagination().getLoadPage() > 0) {
+                pageNumber = request.getPagination().getLoadPage();
+            }
+            if (request.getPagination().getRowsPerPage() > 0) {
+                pageSize = request.getPagination().getRowsPerPage();
+            }
+        }
+
+        Page<Member> members = memberRepository.findAll(PageRequest.of(pageNumber, pageSize));
+
+        MembersListResponse response = new MembersListResponse();
+        response.getPagination().setCurrentPage(pageNumber).setLoadPage(pageNumber).setRowsPerPage(pageSize).setTotalPages(members.getTotalPages()).setTotalRows(members.getTotalElements());
+        response.setMembers(members.getContent());
+        return response;
     }
 
     public List<Member> getAllMembers() {
