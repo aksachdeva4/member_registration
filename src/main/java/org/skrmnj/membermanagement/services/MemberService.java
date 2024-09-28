@@ -41,7 +41,7 @@ public class MemberService {
             }
         }
 
-        Page<Member> members = memberRepository.findAll(PageRequest.of(pageNumber, pageSize));
+        Page<Member> members = memberRepository.findAll(PageRequest.of(pageNumber - 1, pageSize));
 
         MembersListResponse response = new MembersListResponse();
         response.getPagination().setCurrentPage(pageNumber).setLoadPage(pageNumber).setRowsPerPage(pageSize).setTotalPages(members.getTotalPages()).setTotalRows(members.getTotalElements());

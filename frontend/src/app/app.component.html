@@ -42,7 +42,7 @@
                                 </tr>
                             </tbody>
                         </table>
-                        <ngb-pagination (pageChange)="loadPage()" [(page)]="pagination.currentPage" [boundaryLinks]="true" [collectionSize]="pagination.totalRows" [ellipses]="false" [maxSize]="5" [rotate]="true"/>
+                        <ngb-pagination (pageChange)="loadPage($event)" [(page)]="pagination.currentPage" [boundaryLinks]="true" [pageSize]="pagination.rowsPerPage" [collectionSize]="pagination.totalRows" [ellipses]="false" [maxSize]="5" [rotate]="true"/>
                     </div>
 
                 </div>

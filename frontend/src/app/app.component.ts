@@ -42,17 +42,16 @@ export class AppComponent {
             firstName: this.firstName,
             pagination: this.pagination,
         };
-        this.pagination.loadPage = this.pagination.currentPage;
         this.httpClient.post("http://localhost:8080/member/find", params).subscribe((response: any) => {
             this.members = response.members;
             this.pagination = response.pagination;
         });
     }
 
-    loadPage() {
-        if (this.pagination.currentPage != this.pagination.loadPage) {
-            this.filterMembers();
-        }
+    loadPage(loadPageNumber: number) {
+        console.log(loadPageNumber);
+        this.pagination.loadPage = loadPageNumber;
+        this.filterMembers();
     }
 
 }
