@@ -8,9 +8,17 @@ import lombok.experimental.Accessors;
 public class Pagination {
 
     private long totalRows;
-    private int currentPage;
-    private int rowsPerPage;
-    private int totalPages;
-    private int loadPage;
+    private long currentPage;
+    private long rowsPerPage;
+    private long totalPages;
+    private long loadPage;
 
+    public Pagination setTotalRows(long totalRows) {
+        this.totalRows = totalRows;
+
+        if (totalRows > 0) {
+            this.totalPages = (int) Math.ceil((double) totalRows / rowsPerPage);
+        }
+        return this;
+    }
 }

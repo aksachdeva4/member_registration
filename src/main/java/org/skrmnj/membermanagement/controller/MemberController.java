@@ -25,7 +25,6 @@ public class MemberController {
 
     @PostMapping("/find")
     public ResponseEntity<MembersListResponse> getAllMembersFromLastName(@RequestBody MemberListRequest request) {
-        log.debug("Test");
         return ResponseEntity.status(HttpStatus.OK).body(memberService.getAllMembersFromLastName(request));
     }
 

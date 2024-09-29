@@ -6,46 +6,65 @@ import org.skrmnj.membermanagement.controller.beans.MemberListRequest;
 import org.skrmnj.membermanagement.controller.beans.MemberRegistrationRequest;
 import org.skrmnj.membermanagement.controller.beans.MembersListResponse;
 import org.skrmnj.membermanagement.domain.Address;
-import org.skrmnj.membermanagement.domain.AddressRepository;
 import org.skrmnj.membermanagement.domain.Member;
-import org.skrmnj.membermanagement.domain.MemberRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.skrmnj.membermanagement.domain.repository.AddressRepository;
+import org.skrmnj.membermanagement.domain.repository.MemberRepository;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+
+import static org.skrmnj.membermanagement.utilities.Dictionary.BLANK;
 
 @Slf4j
 @Service
 @AllArgsConstructor
 public class MemberService {
 
+    private static final String QUERY_MEMBER_FILTER_FETCH = "select * from members m where ( length(:firstName) < 1 or UPPER(m.first_name) like concat('%',:firstName,'%') ) and ( length(:lastName) < 1 or UPPER(m.last_name) like concat('%',:lastName,'%') ) limit :startIndex, :pageSize ";
+    private static final String QUERY_MEMBER_FILTER_COUNT = "select count(*) from members m where ( length(:firstName) < 1 or UPPER(m.first_name) like concat('%',:firstName,'%') ) and ( length(:lastName) < 1 or UPPER(m.last_name) like concat('%',:lastName,'%') )";
     private final MemberRepository memberRepository;
     private final AddressRepository addressRepository;
+    private final NamedParameterJdbcTemplate npjt;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public MembersListResponse getAllMembersFromLastName(MemberListRequest request) {
 
-        int pageNumber = 0;
-        int pageSize = 20;
+        long startIndex = 0;
+        long pageSize = 20;
 
         if (null != request.getPagination()) {
-            if (request.getPagination().getLoadPage() > 0) {
-                pageNumber = request.getPagination().getLoadPage();
-            }
             if (request.getPagination().getRowsPerPage() > 0) {
                 pageSize = request.getPagination().getRowsPerPage();
             }
+            if (request.getPagination().getLoadPage() > 0) {
+                startIndex = (request.getPagination().getLoadPage() - 1) * pageSize;
+            }
         }
 
-        Page<Member> members = memberRepository.findAll(PageRequest.of(pageNumber - 1, pageSize));
+        Map<String, Object> params = new HashMap<>();
+        params.put("firstName", Objects.requireNonNullElse(request.getFirstName(), BLANK).trim());
+        params.put("lastName", Objects.requireNonNullElse(request.getLastName(), BLANK).trim());
+        params.put("startIndex", startIndex);
+        params.put("pageSize", pageSize);
+
+        List<Member> memberList = npjt.queryForStream(QUERY_MEMBER_FILTER_FETCH, params, (rs, rowNum) -> {
+            Member m = new Member();
+            m.setId(rs.getInt("userid"));
+            m.setFirstName(rs.getString("first_name"));
+            m.setLastName(rs.getString("last_name"));
+            m.setPhoneNumber(rs.getString("phone_number"));
+            m.setCountryCode(rs.getString("country_code"));
+            return m;
+        }).toList();
+
+        long total = npjt.queryForObject(QUERY_MEMBER_FILTER_COUNT, params, Long.class);
 
         MembersListResponse response = new MembersListResponse();
-        response.getPagination().setCurrentPage(pageNumber).setLoadPage(pageNumber).setRowsPerPage(pageSize).setTotalPages(members.getTotalPages()).setTotalRows(members.getTotalElements());
-        response.setMembers(members.getContent());
+        response.getPagination().setCurrentPage(request.getPagination().getLoadPage()).setLoadPage(request.getPagination().getLoadPage()).setRowsPerPage(pageSize).setTotalRows(total);
+        response.setMembers(memberList);
+
         return response;
     }
 
@@ -58,8 +77,7 @@ public class MemberService {
         Member primaryMember = memberRepository.saveAndFlush(convertToMember(memberRegistrationRequest, true, null));
         addressRepository.saveAndFlush(convertToAddress(memberRegistrationRequest, primaryMember));
 
-        List<Member> additionalMembers = Objects.requireNonNullElse(memberRegistrationRequest.getAdditionalMembers(), new ArrayList<MemberRegistrationRequest>())
-                .stream().map(x -> convertToMember(x, false, primaryMember.getId())).toList();
+        List<Member> additionalMembers = Objects.requireNonNullElse(memberRegistrationRequest.getAdditionalMembers(), new ArrayList<MemberRegistrationRequest>()).stream().map(x -> convertToMember(x, false, primaryMember.getId())).toList();
 
         memberRepository.saveAllAndFlush(additionalMembers);
 
