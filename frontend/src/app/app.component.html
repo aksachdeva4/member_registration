@@ -31,6 +31,7 @@
                                     <th scope="col">First Name</th>
                                     <th scope="col">Last Name</th>
                                     <th scope="col">Contact No.</th>
+                                    <th scope="col">Additional Members</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -39,10 +40,11 @@
                                     <td>{{ member.firstName }}</td>
                                     <td>{{ member.lastName }}</td>
                                     <td>{{ member.countryCode }} {{ member.phoneNumber }}</td>
+                                    <td>{{ member.additionalMembersCount }}</td>
                                 </tr>
                             </tbody>
                         </table>
-                        <ngb-pagination (pageChange)="loadPage($event)" [(page)]="pagination.currentPage" [boundaryLinks]="true" [pageSize]="pagination.rowsPerPage" [collectionSize]="pagination.totalRows" [ellipses]="false" [maxSize]="5" [rotate]="true"/>
+                        <ngb-pagination (pageChange)="loadPage($event)" [(page)]="pagination.currentPage" [boundaryLinks]="true" [collectionSize]="pagination.totalRows" [ellipses]="false" [maxSize]="5" [pageSize]="pagination.rowsPerPage" [rotate]="true"/>
                     </div>
 
                 </div>

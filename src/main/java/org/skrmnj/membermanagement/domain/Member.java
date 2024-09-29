@@ -59,4 +59,6 @@ public class Member {
     @Column(name = "initiated_by", length = 3)
     private String initiatedBy;
 
+    private int additionalMembersCount = 0;
+
 }

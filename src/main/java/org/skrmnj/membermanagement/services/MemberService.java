@@ -22,7 +22,7 @@ import static org.skrmnj.membermanagement.utilities.Dictionary.BLANK;
 @AllArgsConstructor
 public class MemberService {
 
-    private static final String QUERY_MEMBER_FILTER_FETCH = "select * from members m where ( length(:firstName) < 1 or UPPER(m.first_name) like concat('%',:firstName,'%') ) and ( length(:lastName) < 1 or UPPER(m.last_name) like concat('%',:lastName,'%') ) limit :startIndex, :pageSize ";
+    private static final String QUERY_MEMBER_FILTER_FETCH = "select m.*, count(adm.userid) additional_members_count from members m Left join members adm on adm.primary_user_id=m.userid where ( length(:firstName) < 1 or UPPER(m.first_name) like concat('%',:firstName,'%') ) and ( length(:lastName) < 1 or UPPER(m.last_name) like concat('%',:lastName,'%') ) group by m.userid limit :startIndex, :pageSize ";
     private static final String QUERY_MEMBER_FILTER_COUNT = "select count(*) from members m where ( length(:firstName) < 1 or UPPER(m.first_name) like concat('%',:firstName,'%') ) and ( length(:lastName) < 1 or UPPER(m.last_name) like concat('%',:lastName,'%') )";
     private final MemberRepository memberRepository;
     private final AddressRepository addressRepository;
@@ -56,6 +56,7 @@ public class MemberService {
             m.setLastName(rs.getString("last_name"));
             m.setPhoneNumber(rs.getString("phone_number"));
             m.setCountryCode(rs.getString("country_code"));
+            m.setAdditionalMembersCount(rs.getInt("additional_members_count"));
             return m;
         }).toList();
 
