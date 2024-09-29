@@ -12,7 +12,7 @@
             <button ngbNavLink>Lookup Member</button>
             <ng-template ngbNavContent>
                 <div class="row">
-                    <div class="col-4">
+                    <div class="col-sm-12 col-md-4">
                         <div class="mb-3">
                             <label class="form-label" for="firstName">First Name : </label>
                             <input [(ngModel)]="firstName" class="form-control" id="firstName" placeholder="First Name" type="text">
@@ -23,7 +23,7 @@
                         </div>
                         <button (click)="filterMembers()" class="btn btn-primary" type="button">Filter Members</button>
                     </div>
-                    <div class="col-8">
+                    <div class="col-sm-12 col-md-8">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
