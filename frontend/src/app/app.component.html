@@ -24,27 +24,38 @@
                         <button (click)="filterMembers()" class="btn btn-primary" type="button">Filter Members</button>
                     </div>
                     <div class="col-sm-12 col-md-8">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th scope="col" sortable="MEMBER_ID" (sort)="onSort($event)">Member Id</th>
-                                    <th scope="col" sortable="FIRST_NAME" (sort)="onSort($event)">First Name</th>
-                                    <th scope="col" sortable="LAST_NAME" (sort)="onSort($event)">Last Name</th>
-                                    <th scope="col" >Contact No.</th>
-                                    <th scope="col" sortable="ADDITIONAL_MEMBERS_COUNT" (sort)="onSort($event)">Additional Members</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr *ngFor="let member of members">
-                                    <td>{{ member.id }}</td>
-                                    <td>{{ member.firstName }}</td>
-                                    <td>{{ member.lastName }}</td>
-                                    <td>{{ member.countryCode }} {{ member.phoneNumber }}</td>
-                                    <td>{{ member.additionalMembersCount }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <ngb-pagination (pageChange)="loadPage($event)" [(page)]="pagination.currentPage" [boundaryLinks]="true" [collectionSize]="pagination.totalRows" [ellipses]="false" [maxSize]="5" [pageSize]="pagination.rowsPerPage" [rotate]="true"/>
+                        <div class="row">
+                            <div class="col-12 table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" sortable="MEMBER_ID" (sort)="onSort($event)">Member Id</th>
+                                            <th scope="col" sortable="FIRST_NAME" (sort)="onSort($event)">First Name</th>
+                                            <th scope="col" sortable="LAST_NAME" (sort)="onSort($event)">Last Name</th>
+                                            <th scope="col">Contact No.</th>
+                                            <th scope="col" sortable="ADDITIONAL_MEMBERS_COUNT" (sort)="onSort($event)">Additional Members</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let member of members">
+                                            <td>{{ member.id }}</td>
+                                            <td>{{ member.firstName }}</td>
+                                            <td>{{ member.lastName }}</td>
+                                            <td>{{ member.countryCode }} {{ member.phoneNumber }}</td>
+                                            <td>{{ member.additionalMembersCount }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-12 d-flex justify-content-between pt-2">
+                                <ngb-pagination (pageChange)="loadPage($event)" [(page)]="pagination.currentPage" [boundaryLinks]="true" [collectionSize]="pagination.totalRows" [ellipses]="false" [maxSize]="5" [pageSize]="pagination.rowsPerPage" [rotate]="true"/>
+                                <select class="form-select" style="width: auto" [(ngModel)]="pagination.rowsPerPage" (ngModelChange)="pagination.loadPage=1;filterMembers()">
+                                    <option [ngValue]="20">20</option>
+                                    <option [ngValue]="50">50</option>
+                                    <option [ngValue]="100">100</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
                 </div>
