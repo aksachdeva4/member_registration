@@ -6,9 +6,9 @@ import org.skrmnj.membermanagement.enums.SortingDirection;
 
 @Data
 @Accessors(chain = true)
-public class SortingOption {
+public class SortingOption<E extends Enum<E>> {
 
-    private String columnName;
+    private E sortingColumn;
     private SortingDirection sortingDirection;
 
 }

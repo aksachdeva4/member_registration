@@ -20,8 +20,8 @@ export class AppComponent {
     firstName = '';
     lastName = '';
     active = 2;
-    sortingOption: { columnName: string, sortingDirection: SortDirection } = {
-        columnName: 'id',
+    sortingOption: { sortingColumn: string, sortingDirection: SortDirection } = {
+        sortingColumn: 'id',
         sortingDirection: "asc"
     }
     members: any = []
@@ -37,10 +37,6 @@ export class AppComponent {
 
     constructor(private httpClient: HttpClient) {
         this.filterMembers();
-    }
-
-    getAllMembers() {
-        this.httpClient.get("http://localhost:8080/member/get-all").subscribe((response) => this.members = response);
     }
 
     filterMembers() {
@@ -73,7 +69,7 @@ export class AppComponent {
             }
         }
 
-        this.sortingOption.columnName = column;
+        this.sortingOption.sortingColumn = column;
         this.sortingOption.sortingDirection = direction;
         this.filterMembers();
     }

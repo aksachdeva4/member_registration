@@ -28,4 +28,8 @@ public enum SortingDirection {
         return Arrays.stream(sortingDirection).anyMatch(s -> Utils.arrayContains(s, this.name(), this.dbDirection));
     }
 
+    public boolean match(SortingDirection... sortingDirection) {
+        return Arrays.stream(sortingDirection).anyMatch(s -> Utils.arrayContains(s.name(), this.name()));
+    }
+
 }

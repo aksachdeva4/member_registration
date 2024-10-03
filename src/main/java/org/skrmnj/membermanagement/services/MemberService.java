@@ -10,6 +10,8 @@ import org.skrmnj.membermanagement.domain.Address;
 import org.skrmnj.membermanagement.domain.Member;
 import org.skrmnj.membermanagement.domain.repository.AddressRepository;
 import org.skrmnj.membermanagement.domain.repository.MemberRepository;
+import org.skrmnj.membermanagement.enums.MemberListSortingColumns;
+import org.skrmnj.membermanagement.enums.SortingDirection;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,14 +29,6 @@ public class MemberService {
     private static final String QUERY_ORDER_BY = " ORDER BY %s %s ";
     private static final String QUERY_LIMIT = " limit :startIndex, :pageSize ";
     private static final String QUERY_MEMBER_FILTER_COUNT = "select count(*) from members m where ( length(:firstName) < 1 or UPPER(m.first_name) like concat('%',:firstName,'%') ) and ( length(:lastName) < 1 or UPPER(m.last_name) like concat('%',:lastName,'%') )";
-    private static final Map<String, String> columnMapping = new HashMap<>();
-
-    static {
-        columnMapping.put("id", "userid");
-        columnMapping.put("firstName", "first_name");
-        columnMapping.put("lastName", "last_name");
-        columnMapping.put("additionalMembersCount", "additional_members_count");
-    }
 
     private final MemberRepository memberRepository;
     private final AddressRepository addressRepository;
@@ -61,6 +55,8 @@ public class MemberService {
         params.put("startIndex", startIndex);
         params.put("pageSize", pageSize);
 
+        log.debug("{}", request.getSortingOption());
+
         String selectQuery = QUERY_MEMBER_FILTER_FETCH.concat(getOrderBy(request.getSortingOption())).concat(QUERY_LIMIT);
 
         List<Member> memberList = npjt.queryForStream(selectQuery, params, (rs, rowNum) -> {
@@ -83,20 +79,16 @@ public class MemberService {
         return response;
     }
 
-    private String getOrderBy(SortingOption sortingOptions) {
-        String columnName = columnMapping.get("id");
+    private String getOrderBy(SortingOption<MemberListSortingColumns> sortingOptions) {
+        String columnName = MemberListSortingColumns.MEMBER_ID.getColumnName();
         String direction = "asc";
 
-        if (sortingOptions != null && columnMapping.containsKey(sortingOptions.getColumnName()) && sortingOptions.getSortingDirection().match("asc", "desc")) {
-            columnName = columnMapping.get(sortingOptions.getColumnName());
+        if (sortingOptions != null && !MemberListSortingColumns.NONE.match(sortingOptions.getSortingColumn()) && !sortingOptions.getSortingDirection().match(SortingDirection.NONE)) {
+            columnName = sortingOptions.getSortingColumn().getColumnName();
             direction = sortingOptions.getSortingDirection().getDbDirection();
         }
 
         return String.format(QUERY_ORDER_BY, columnName, direction);
-    }
-
-    public List<Member> getAllMembers() {
-        return memberRepository.findAll();
     }
 
     public boolean registerMember(MemberRegistrationRequest memberRegistrationRequest) {
