@@ -27,11 +27,11 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th scope="col">Member Id</th>
-                                    <th scope="col">First Name</th>
-                                    <th scope="col">Last Name</th>
-                                    <th scope="col">Contact No.</th>
-                                    <th scope="col">Additional Members</th>
+                                    <th scope="col" sortable="id" (sort)="onSort($event)">Member Id</th>
+                                    <th scope="col" sortable="firstName" (sort)="onSort($event)">First Name</th>
+                                    <th scope="col" sortable="lastName" (sort)="onSort($event)">Last Name</th>
+                                    <th scope="col" >Contact No.</th>
+                                    <th scope="col" sortable="additionalMembersCount" (sort)="onSort($event)">Additional Members</th>
                                 </tr>
                             </thead>
                             <tbody>

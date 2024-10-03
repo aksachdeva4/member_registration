@@ -2,6 +2,7 @@ package org.skrmnj.membermanagement.controller.beans;
 
 import lombok.Data;
 import org.skrmnj.membermanagement.bean.Pagination;
+import org.skrmnj.membermanagement.bean.SortingOptions;
 
 @Data
 public class MemberListRequest {
@@ -15,5 +16,6 @@ public class MemberListRequest {
     private Address address;
 
     private Pagination pagination;
+    private SortingOptions sortingOption;
 
 }

@@ -2,6 +2,7 @@ package org.skrmnj.membermanagement.services;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.skrmnj.membermanagement.bean.SortingOptions;
 import org.skrmnj.membermanagement.controller.beans.MemberListRequest;
 import org.skrmnj.membermanagement.controller.beans.MemberRegistrationRequest;
 import org.skrmnj.membermanagement.controller.beans.MembersListResponse;
@@ -9,6 +10,7 @@ import org.skrmnj.membermanagement.domain.Address;
 import org.skrmnj.membermanagement.domain.Member;
 import org.skrmnj.membermanagement.domain.repository.AddressRepository;
 import org.skrmnj.membermanagement.domain.repository.MemberRepository;
+import org.skrmnj.membermanagement.utilities.Utils;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,8 +24,19 @@ import static org.skrmnj.membermanagement.utilities.Dictionary.BLANK;
 @AllArgsConstructor
 public class MemberService {
 
-    private static final String QUERY_MEMBER_FILTER_FETCH = "select m.*, count(adm.userid) additional_members_count from members m Left join members adm on adm.primary_user_id=m.userid where ( length(:firstName) < 1 or UPPER(m.first_name) like concat('%',:firstName,'%') ) and ( length(:lastName) < 1 or UPPER(m.last_name) like concat('%',:lastName,'%') ) group by m.userid limit :startIndex, :pageSize ";
+    private static final String QUERY_MEMBER_FILTER_FETCH = "select m.*, count(adm.userid) additional_members_count from members m Left join members adm on adm.primary_user_id=m.userid where ( length(:firstName) < 1 or UPPER(m.first_name) like concat('%',:firstName,'%') ) and ( length(:lastName) < 1 or UPPER(m.last_name) like concat('%',:lastName,'%') ) group by m.userid ";
+    private static final String QUERY_ORDER_BY = " ORDER BY %s %s ";
+    private static final String QUERY_LIMIT = " limit :startIndex, :pageSize ";
     private static final String QUERY_MEMBER_FILTER_COUNT = "select count(*) from members m where ( length(:firstName) < 1 or UPPER(m.first_name) like concat('%',:firstName,'%') ) and ( length(:lastName) < 1 or UPPER(m.last_name) like concat('%',:lastName,'%') )";
+    private static final Map<String, String> columnMapping = new HashMap<>();
+
+    static {
+        columnMapping.put("id", "userid");
+        columnMapping.put("firstName", "first_name");
+        columnMapping.put("lastName", "last_name");
+        columnMapping.put("additionalMembersCount", "additional_members_count");
+    }
+
     private final MemberRepository memberRepository;
     private final AddressRepository addressRepository;
     private final NamedParameterJdbcTemplate npjt;
@@ -49,7 +62,9 @@ public class MemberService {
         params.put("startIndex", startIndex);
         params.put("pageSize", pageSize);
 
-        List<Member> memberList = npjt.queryForStream(QUERY_MEMBER_FILTER_FETCH, params, (rs, rowNum) -> {
+        String selectQuery = QUERY_MEMBER_FILTER_FETCH.concat(getOrderBy(request.getSortingOption())).concat(QUERY_LIMIT);
+
+        List<Member> memberList = npjt.queryForStream(selectQuery, params, (rs, rowNum) -> {
             Member m = new Member();
             m.setId(rs.getInt("userid"));
             m.setFirstName(rs.getString("first_name"));
@@ -60,13 +75,25 @@ public class MemberService {
             return m;
         }).toList();
 
-        long total = npjt.queryForObject(QUERY_MEMBER_FILTER_COUNT, params, Long.class);
+        long total = Objects.requireNonNullElse(npjt.queryForObject(QUERY_MEMBER_FILTER_COUNT, params, Long.class), 0L);
 
         MembersListResponse response = new MembersListResponse();
         response.getPagination().setCurrentPage(request.getPagination().getLoadPage()).setLoadPage(request.getPagination().getLoadPage()).setRowsPerPage(pageSize).setTotalRows(total);
         response.setMembers(memberList);
 
         return response;
+    }
+
+    private String getOrderBy(SortingOptions sortingOptions) {
+        String columnName = columnMapping.get("id");
+        String direction = "asc";
+
+        if (sortingOptions != null && columnMapping.containsKey(sortingOptions.getColumnName()) && Utils.arrayContains(sortingOptions.getSortingDirection(), "asc", "desc")) {
+            columnName = columnMapping.get(sortingOptions.getColumnName());
+            direction = sortingOptions.getSortingDirection();
+        }
+
+        return String.format(QUERY_ORDER_BY, columnName, direction);
     }
 
     public List<Member> getAllMembers() {
