@@ -2,12 +2,13 @@ package org.skrmnj.membermanagement.bean;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.skrmnj.membermanagement.enums.SortingDirection;
 
 @Data
 @Accessors(chain = true)
-public class SortingOptions {
+public class SortingOption {
 
     private String columnName;
-    private String sortingDirection;
+    private SortingDirection sortingDirection;
 
 }

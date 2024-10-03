@@ -2,7 +2,7 @@ package org.skrmnj.membermanagement.services;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.skrmnj.membermanagement.bean.SortingOptions;
+import org.skrmnj.membermanagement.bean.SortingOption;
 import org.skrmnj.membermanagement.controller.beans.MemberListRequest;
 import org.skrmnj.membermanagement.controller.beans.MemberRegistrationRequest;
 import org.skrmnj.membermanagement.controller.beans.MembersListResponse;
@@ -10,7 +10,6 @@ import org.skrmnj.membermanagement.domain.Address;
 import org.skrmnj.membermanagement.domain.Member;
 import org.skrmnj.membermanagement.domain.repository.AddressRepository;
 import org.skrmnj.membermanagement.domain.repository.MemberRepository;
-import org.skrmnj.membermanagement.utilities.Utils;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,13 +83,13 @@ public class MemberService {
         return response;
     }
 
-    private String getOrderBy(SortingOptions sortingOptions) {
+    private String getOrderBy(SortingOption sortingOptions) {
         String columnName = columnMapping.get("id");
         String direction = "asc";
 
-        if (sortingOptions != null && columnMapping.containsKey(sortingOptions.getColumnName()) && Utils.arrayContains(sortingOptions.getSortingDirection(), "asc", "desc")) {
+        if (sortingOptions != null && columnMapping.containsKey(sortingOptions.getColumnName()) && sortingOptions.getSortingDirection().match("asc", "desc")) {
             columnName = columnMapping.get(sortingOptions.getColumnName());
-            direction = sortingOptions.getSortingDirection();
+            direction = sortingOptions.getSortingDirection().getDbDirection();
         }
 
         return String.format(QUERY_ORDER_BY, columnName, direction);
